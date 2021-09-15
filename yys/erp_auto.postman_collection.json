@@ -1,0 +1,925 @@
+{
+	"info": {
+		"_postman_id": "55cabfbc-ceb6-423e-a8c5-5e9bdb1a6c81",
+		"name": "erp_auto",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "yys",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**\r",
+									" * check get access to data token,assert ResponseID、Message\r",
+									" * Tests作用：\r",
+									" * 1、可作断言；获取当前接口的响应，传递给下一个接口；\r",
+									" * 2、控制多个接口间的执行顺序\r",
+									" */\r",
+									"pm.test(data.case_name,function(){\r",
+									"    var jsonData=JSON.parse(responseBody);\r",
+									"    pm.expect(jsonData.ResponseID).to.eql(data.excepted_ResponseID);\r",
+									"    pm.expect(jsonData.Message).to.eql(data['excepted_Message']);\r",
+									"    if(jsonData.Data.token!=null || jsonData.Data.token!=\"\"){\r",
+									"        pm.globals.set(\"token\",jsonData.Data.token);\r",
+									"    }else{\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\":\"{{userName}}\",\r\n    \"userPwd\":\"{{userPwd}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/user/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						},
+						"description": "用户登录"
+					},
+					"response": []
+				},
+				{
+					"name": "seller_info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**\r",
+									" * get店员ID:seller_id;付款机构ID：branch_id；付款账号ID：pay_code\r",
+									" */\r",
+									"var jsonRes = pm.response.json();\r",
+									"if(jsonRes.Data != null || jsonRes.Data != \"\"){\r",
+									"    //get店员ID：seller_id\r",
+									"    var sellerCount = jsonRes.Data.sellers.length;\r",
+									"    if(sellerCount>0){\r",
+									"        var index = Math.floor(Math.random()*sellerCount);\r",
+									"        pm.collectionVariables.set(\"seller_id\",jsonRes.Data.sellers[index].seller_id);\r",
+									"        console.log(\"seller_id:\"+pm.collectionVariables.get(\"seller_id\"));\r",
+									"    }else{\r",
+									"        console.log(\"no sellers!!!\");\r",
+									"    }\r",
+									"    //get付款机构ID：pay_branch\r",
+									"    var branchCount = jsonRes.Data.branches.length;\r",
+									"    if(branchCount>0){\r",
+									"        var index = Math.floor(Math.random()*branchCount);\r",
+									"        pm.collectionVariables.set(\"pay_branch\",jsonRes.Data.branches[index].branch_id);\r",
+									"        console.log(\"branch_id:\"+pm.collectionVariables.get(\"pay_branch\"));\r",
+									"    }else{\r",
+									"        console.log(\"No branchs!!!\");\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"    //get付款账号ID：pay_account\r",
+									"    var accountsCount = jsonRes.Data.accounts.length;\r",
+									"    if(accountsCount>0){\r",
+									"        var index = Math.floor(Math.random()*accountsCount);\r",
+									"        pm.collectionVariables.set(\"pay_account\",jsonRes.Data.accounts[index].pay_code);\r",
+									"        console.log(\"pay_code:\"+pm.collectionVariables.get(\"pay_account\"));\r",
+									"    }else{\r",
+									"        console.log(\"No accounts!!!\");\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"}else{\r",
+									"    console.log(\"no datas!!!\");\r",
+									"    postman.setNextRequest(null);//仅适用于Collection Runner和Newman，目的是运行集合，而不是发送单个请求\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/seller/infos",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"seller",
+								"infos"
+							]
+						},
+						"description": "获取店员信息"
+					},
+					"response": []
+				},
+				{
+					"name": "userList",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"if(jsonData.Data != null || jsonData.Data != \"\"){\r",
+									"    var count = jsonData.Data.length;\r",
+									"    if(count > 0){\r",
+									"        var index = Math.floor(Math.random()*count);\r",
+									"        pm.collectionVariables.set(\"handle\",jsonData.Data[index].Id);\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/User/UserList",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"UserList"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "queryJob",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**\r",
+									" * check query job,assert return_code、return_message\r",
+									" * JSON.parse():从一个字符串中解析出json对象,把string转对象\r",
+									" * JSON.stringify():从一个对象中解析出字符串，主要针对[object object]类型数据的转换,把对象转String\r",
+									" * 变量易混淆点：\r",
+									" * 设置变量只能存储字符串，如果是对象的话则无法在下次运行时获取到内容\r",
+									" * 如需要存储JSON数据，可以用JSON.stringify(..)存储，再用JSON.parse(..)转化为对象使用\r",
+									" */\r",
+									"var jsonData = JSON.parse(responseBody);\r",
+									"if(jsonData.return_code === \"0\"){\r",
+									"    var count = jsonData.Data.datas.length;\r",
+									"    var jobArr = new Array();\r",
+									"    var index = 0;\r",
+									"    var carrier_id = \"\";\r",
+									"    var job_id = \"\";\r",
+									"    var remain_amount =0;\r",
+									"    if(count>0){\r",
+									"        for(var i=0;i<count;i++){\r",
+									"            if(jsonData.Data.datas[i].is_valid == 1){\r",
+									"                carrier_id = jsonData.Data.datas[i].carrier_id;\r",
+									"                job_id = jsonData.Data.datas[i].job_id;\r",
+									"                remain_amount = jsonData.Data.datas[i].remain_amount;\r",
+									"                jobArr[index]={carrier_id,job_id,remain_amount};\r",
+									"                index++;\r",
+									"            }else{\r",
+									"                continue;\r",
+									"            }\r",
+									"        }\r",
+									"        pm.collectionVariables.set(\"jobArr\",JSON.stringify(jobArr));\r",
+									"        console.log(\"jobArr:\"+pm.collectionVariables.get(\"jobArr\"));\r",
+									"    }else{\r",
+									"        console.log(\"job no data!!!\");\r",
+									"    }\r",
+									"}else{\r",
+									"    postman.setNextRequest(null);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/jobnum/list",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"jobnum",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "queryBusi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Construct busi data\r",
+									"var jsonData = pm.response.json();\r",
+									"if (tests[\"Response success\"] = jsonData.return_code === \"0\") {\r",
+									"    var busiData = jsonData.Data.datas;\r",
+									"    if (busiData != null || busiData != \"\") {\r",
+									"        var info = getBusi(busiData);\r",
+									"        if(info[\"details\"].length > 0){\r",
+									"            //set busi vars into collectionVars\r",
+									"            pm.collectionVariables.set(\"details\", JSON.stringify(info[\"details\"]));\r",
+									"            pm.collectionVariables.set(\"total_amount\", info[\"totalAmount\"].toFixed(2));\r",
+									"            pm.collectionVariables.set(\"detail_count\", info[\"details\"].length);\r",
+									"            //debug busi log\r",
+									"            console.log(\"details:\" + pm.collectionVariables.get(\"details\"));\r",
+									"            console.log(\"total_amount:\" + pm.collectionVariables.get(\"total_amount\"));\r",
+									"            console.log(\"detail_count:\" + pm.collectionVariables.get(\"detail_count\"));\r",
+									"            //judge recharge\r",
+									"            if(info[\"kjycArr\"].length > 0){\r",
+									"                var recharge = getRecharge(info[\"kjycArr\"]);\r",
+									"                if(recharge[\"rechargeArr\"].length > 0){\r",
+									"                    //set recharge vars\r",
+									"                    pm.collectionVariables.set(\"recharge_arr\",JSON.stringify(recharge[\"rechargeArr\"]));\r",
+									"                    pm.collectionVariables.set(\"recharge_count\",recharge[\"rechargeArr\"].length);\r",
+									"                    pm.collectionVariables.set(\"recharge_total_amount\",recharge[\"rechargeTotalAmount\"].toFixed(2));\r",
+									"                    pm.collectionVariables.set(\"remark\",\"工号充值\");\r",
+									"                    //debug recharge log\r",
+									"                    console.log(\"recharge_arr:\"+pm.collectionVariables.get(\"recharge_arr\"));\r",
+									"                    console.log(\"recharge_count:\"+pm.collectionVariables.get(\"recharge_count\"));\r",
+									"                    console.log(\"recharge_total_amount:\"+pm.collectionVariables.get(\"recharge_total_amount\"));\r",
+									"                    postman.setNextRequest(\"addRecharge\")\r",
+									"                }else{\r",
+									"                    postman.setNextRequest(\"payType\");\r",
+									"                }\r",
+									"            }else{\r",
+									"                postman.setNextRequest(null);\r",
+									"            }\r",
+									"        }else{\r",
+									"            console.log(\"busi is invalid!!!\");\r",
+									"            postman.setNextRequest(null);\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.log(\"busi no data!!!\");\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"} else {\r",
+									"    console.log(\"queryBusi inter is stop!!!\");\r",
+									"    postman.setNextRequest(null);\r",
+									"}\r",
+									"/**\r",
+									" * const busi data\r",
+									" * parm:busiArr[]\r",
+									" */\r",
+									"function getBusi(busiArr){\r",
+									"    console.log(\"in getBusi().....\");\r",
+									"    var count = Math.ceil(Math.random() * (busiArr.length));\r",
+									"    var jobArr = JSON.parse(pm.collectionVariables.get(\"jobArr\"));\r",
+									"    //busi vars\r",
+									"    var details = new Array();\r",
+									"    var totalAmount = 0;\r",
+									"    var index = 0;\r",
+									"    //kjycArr vars\r",
+									"    var kjycArr = new Array();\r",
+									"    var k = 0;\r",
+									"    for (var i = 0; i < count; i++) {\r",
+									"        //check busi is valid\r",
+									"        if (busiArr[i].is_valid == 1) {\r",
+									"            var business_id = busiArr[i].id;\r",
+									"            var amount = (Math.random() * 1000).toFixed(2);\r",
+									"            var kjyck = busiArr[i].kjyck;\r",
+									"            var ygyj = busiArr[i].ygyj;\r",
+									"            var sjyj = (Math.random() * 100).toFixed(2);\r",
+									"            var dbjf = busiArr[i].dbjf;\r",
+									"            //set job_id\r",
+									"            var newJobArr = jobArr.filter(item => {\r",
+									"                return item.carrier_id == busiArr[i].carrier_id;\r",
+									"            });\r",
+									"            var carrier_id = newJobArr[Math.floor(Math.random() * newJobArr.length)].carrier_id;\r",
+									"            var job_id = newJobArr[Math.floor(Math.random() * newJobArr.length)].job_id;\r",
+									"            var remain_amount = newJobArr[Math.floor(Math.random() * newJobArr.length)].remain_amount;\r",
+									"            //set kjycArr\r",
+									"            kjycArr[k] = { carrier_id, job_id, kjyck, remain_amount };\r",
+									"            k++;\r",
+									"            //set busi vars\r",
+									"            details[index] = { business_id, job_id, amount, kjyck, ygyj, sjyj, dbjf };\r",
+									"            totalAmount += Number(amount);\r",
+									"            index++;\r",
+									"        } else {\r",
+									"            continue;\r",
+									"        }\r",
+									"    }\r",
+									"    var busi = {\"details\":details,\"totalAmount\":totalAmount,\"kjycArr\":kjycArr};\r",
+									"    return busi;\r",
+									"}\r",
+									"/**\r",
+									" * judge recharge\r",
+									" * pram:kjycArr[]\r",
+									" */\r",
+									"function getRecharge(kjycArr){\r",
+									"    console.log(\"in getRecharge().....\");\r",
+									"    var newArr = [];\r",
+									"    var rechargeArr = [];\r",
+									"    var rechargeTotalAmount = 0;\r",
+									"    //array quchong\r",
+									"    kjycArr.forEach(el => {\r",
+									"        const res = newArr.findIndex(ol=>{return el.carrier_id == ol.carrier_id && el.job_id == ol.job_id });\r",
+									"        if (res !== -1) {\r",
+									"            //kjyc++\r",
+									"            newArr[res].kjyck = parseFloat(newArr[res].kjyck) + parseFloat(el.kjyck);\r",
+									"            newArr[res].kjyck = (newArr[res].kjyck).toFixed(2);\r",
+									"        } else {\r",
+									"            newArr.push(el);\r",
+									"        }\r",
+									"    })\r",
+									"    console.log(\"newArr:\" +newArr);\r",
+									"    //judge remain_amount<kjyc\r",
+									"    var needRechargeArr = newArr.filter(job=>{\r",
+									"        return job.remain_amount <job.kjyck;\r",
+									"    });\r",
+									"    console.log(\"needRechargeArr:\"+needRechargeArr);\r",
+									"    //judge recharge\r",
+									"    if(needRechargeArr.length >0){\r",
+									"        var amount = 0;\r",
+									"        for(var i=0;i<needRechargeArr.length;i++){\r",
+									"            var carrier_id = needRechargeArr[i].carrier_id;\r",
+									"            var job_id = needRechargeArr[i].job_id;    \r",
+									"            var kjyck = Number(needRechargeArr[i].kjyck);                            \r",
+									"            do{\r",
+									"                amount = (Math.random()*10000).toFixed(2);\r",
+									"            }while(amount < kjyck);\r",
+									"            var remark = \"充值\"+amount;                                      \r",
+									"            rechargeArr[i]= {carrier_id,job_id,amount,remark};\r",
+									"            rechargeTotalAmount = parseFloat(rechargeTotalAmount) + parseFloat(amount);//+= is string\r",
+									"        }\r",
+									"    }\r",
+									"    var recharge = {\"rechargeArr\":rechargeArr,\"rechargeTotalAmount\":rechargeTotalAmount};\r",
+									"    return recharge;\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/busi/list",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"busi",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addRecharge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"tests[\"Response success\"] = jsonData.return_code ===\"0\";"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\",\r\n    \"handle\":\"{{handle}}\",\r\n    \"pay_branch\":\"{{pay_branch}}\",\r\n    \"pay_account\":\"{{pay_account}}\",\r\n    \"details_count\":{{recharge_count}},\r\n    \"total_amount\":{{recharge_total_amount}},\r\n    \"remark\":\"{{remark}}\",\r\n    \"details\":{{recharge_arr}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/jobnum/recharge",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"jobnum",
+								"recharge"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payType",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**\r",
+									" * 根据订单实际支付金额，获取创建运营商订单的支付备注为入参：payRemark\r",
+									" */\r",
+									"var jsonRes = pm.response.json();\r",
+									"if(tests[\"Response success\"] = jsonRes.ResponseID === 0){\r",
+									"    if(jsonRes.Data.length>0){\r",
+									"        var totalAmount = pm.collectionVariables.get(\"total_amount\");\r",
+									"        console.log(\"totalAmount:\"+totalAmount);\r",
+									"        var payRemark = \"\";\r",
+									"        var amount = 0;\r",
+									"        for(var i=0;i<jsonRes.Data.length;i++){\r",
+									"            if((i+1) != jsonRes.Data.length){\r",
+									"                amount = (Math.random()*totalAmount).toFixed(2);\r",
+									"                totalAmount -= amount;\r",
+									"                payRemark += jsonRes.Data[i].Name+\":\"+amount+\"|\";\r",
+									"            }else{\r",
+									"                totalAmount = totalAmount.toFixed(2);\r",
+									"                payRemark += jsonRes.Data[i].Name+\":\"+totalAmount;\r",
+									"            }\r",
+									"        }\r",
+									"        console.log(\"pay_remark:\"+payRemark);\r",
+									"        pm.collectionVariables.set(\"pay_remark\",payRemark);\r",
+									"    }else{\r",
+									"        console.log(\"payType no data!!\");\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"}else{\r",
+									"    console.log(\"process stop!!\");\r",
+									"    postman.setNextRequest(null);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/Api/Retail/PayType",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"Api",
+								"Retail",
+								"PayType"
+							]
+						},
+						"description": "获取支付类型"
+					},
+					"response": []
+				},
+				{
+					"name": "queryRetail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"if(tests['return_code'] = jsonData.return_code === \"0\"){\r",
+									"    var count = jsonData.Data.total_items;\r",
+									"    if(count > 0){\r",
+									"        var index = Math.floor(Math.random()*count);\r",
+									"        pm.collectionVariables.set(\"retail_order_code\",jsonData.Data.datas[index].retail_order_code);\r",
+									"        console.log(\"retailOrderCode:\"+pm.collectionVariables.get(\"retail_order_code\"));\r",
+									"    }else{\r",
+									"        pm.collectionVariables.set(\"retail_order_code\",\"\");\r",
+									"        console.log(\"no retail orders!!!\");\r",
+									"    }\r",
+									"}else{\r",
+									"    postman.setNextRequest(null);\r",
+									"    console.log(\"process stop!!\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/order/retailList",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"order",
+								"retailList"
+							]
+						},
+						"description": "获取零售列表（收银未退款订单）"
+					},
+					"response": []
+				},
+				{
+					"name": "addBusiOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//seller_info-->queryJob_case-->queryBusi_case-->payType-->queryRetail_case\r",
+									"var jsonData = pm.response.json();\r",
+									"tests[\"Response success\"]=jsonData.return_code ===\"0\""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"phone\",\"17166666666\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\",\r\n    \"seller_id\":\"{{seller_id}}\",\r\n    \"phone\":\"{{phone}}\",\r\n    \"details\":{{details}},\r\n    \"amount\":{{total_amount}},\r\n    \"detail_count\":{{detail_count}},\r\n    \"pay_remark\":\"{{pay_remark}}\",\r\n    \"retail_order_code\":\"{{retail_order_code}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/order/createOrder",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"order",
+								"createOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "queryBusiOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"if(tests[\"Response success\"]=jsonData.return_code ===\"0\"){\r",
+									"    if(jsonData.Data.total_items > 0){\r",
+									"        var index = Math.floor(Math.random()*(jsonData.Data.total_items));\r",
+									"        //random set order_code\r",
+									"        if(!jsonData.Data.datas[index].cancel){\r",
+									"            pm.collectionVariables.set(\"order_code\",jsonData.Data.datas[index].order_code);\r",
+									"            console.log(\"order_code:\"+pm.collectionVariables.get(\"order_code\"));\r",
+									"        }else{\r",
+									"            postman.setNextRequest(null);\r",
+									"        }\r",
+									"    }else{\r",
+									"        postman.setNextRequest(null);\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//do cleanUp()\r",
+									"cleanUp();\r",
+									"/**\r",
+									" * 动态变量:pm.variables.replaceIn()\r",
+									" * decription:get current time\r",
+									" */\r",
+									"function getCurrentTime(){\r",
+									"    var currentTime = pm.variables.replaceIn('{{$isoTimestamp}}').split(\"T\")[0];\r",
+									"    pm.collectionVariables.set(\"begin\",currentTime);\r",
+									"    pm.collectionVariables.set(\"end\",currentTime);\r",
+									"    console.log(\"current time：\"+currentTime);\r",
+									"}\r",
+									"/**\r",
+									" * decription:after run collection,clear collection vars\r",
+									" */\r",
+									"function cleanUp() {\r",
+									"    const clean = \r",
+									"    [\r",
+									"        'seller_id','pay_branch','pay_account',,'handle',\r",
+									"        'jobArr',\r",
+									"        'kjycArr','details','total_amount','detail_count',\r",
+									"        'recharge_arr','recharge_count','recharge_total_amount','remark',\r",
+									"        'pay_remark','retail_order_code',\r",
+									"        'phone'\r",
+									"        // ,'begin'\r",
+									"        // ,'end'\r",
+									"    ]\r",
+									"    for(let i = 0; i < clean.length; ++i){\r",
+									"        pm.collectionVariables.unset(clean[i]);\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/order/busiOrderList",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"order",
+								"busiOrderList"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cancelBusiOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//check cancelBusiOrder,assert return_code、return_message\r",
+									"var jsonData = pm.response.json();\r",
+									"if(tests[\"Response Success\"] = jsonData.return_code === \"0\"){\r",
+									"    pm.collectionVariables.unset(\"order_code\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"{{token}}\",\r\n    \"order_code\":\"{{order_code}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/operapi/order/cancelOrder",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"operapi",
+								"order",
+								"cancelOrder"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "运营商业务",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"/**",
+							" * 是否满足前提条件（逆）",
+							" * 是否携带默认值参数（正）",
+							" * 业务规则、功能需求（正逆）",
+							" * 参数是否必填（逆）",
+							" * 参数之间是否存在关联（逆）",
+							" * 参数数据类型限制（逆）",
+							" * 参数数据类型自身的数据范围值限制(正逆)",
+							" * 各变量优先级",
+							" * global<collection<environment<data<local",
+							" * A:Pre-request Script;B:Test Script",
+							" * 脚本执行顺序",
+							" * collection(A)<folder(A)<request(A)<request<response<collection(B)<folder(B)<request(B)",
+							" */"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"/**",
+							" * 一、从结构上看，所有的数据（data）最终都可以分解成三种类型(数据构成的最小单位)，即数据结构三种形式：",
+							" *  第一种类型是标量（scalar），也就是一个单独的字符串（string）或数字（numbers）",
+							" *  第二种类型是序列（sequence），也就是若干个相关的数据按照一定顺序并列在一起，又叫做数组（array）或列表（List）",
+							" *  第三种类型是映射（mapping），也就是一个名/值对（Name/value），即数据有一个名称，还有一个与之相对应的值，这又称作散列（hash）或字典（dictionary）",
+							" * 二、JSON",
+							" *  1、概念：JSON纯粹是一种数据描述语言，一种简便的数据交换格式，能够在服务器之间交换数据",
+							" *  2、有效数据类型：",
+							" *      四种基本类型：字符串(\"x\")、数字(1、1.02)、布尔(true、false) 、Null值(null)",
+							" *      两种结构类型：对象(无序的键值对集合:逗号分隔并以大括号括起来)、数组(值的有序序列，逗号分隔并括在方括号中)        ",
+							" *  3、无效数据类型:函数、日期、undefined",
+							" *  4、JSON格式四条规则",
+							" *      并列的数据之间用逗号（\", \"）分隔",
+							" *      映射用冒号（\": \"）表示",
+							" *      并列数据的集合（数组）用方括号(\"[]\")表示",
+							" *      映射的集合（对象）用大括号（\"{}\"）表示",
+							" * 三、数组\"(array)和\"对象\"(object)易混淆点",
+							" *  根本区别：数组表示有序数据的集合，而对象表示无序数据的集合。如果数据的顺序很重要，就用数组，否则就用对象",
+							" *  另一个区别：数组的数据没有\"名称\"（name），对象的数据有\"名称\"（name）",
+							" */"
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"/**",
+					" * 接口自动化包含的因素",
+					" *      1、如何判断接口是否请求成功",
+					" *      2、如何进行接口批量、定期测试",
+					" *      3、如何处理依赖接口问题",
+					" * 集合运行参数：Runner、数据驱动作用",
+					" *      1、Runner用途：逐个运行某个集合下的多个API、针对某个或某场景API采用数据驱动的方式运行，常用于批量造数据",
+					" *      2、数据驱动作用：批量测试等价类的测试用例、通过接口批量造数据",
+					" */"
+				]
+			}
+		}
+	]
+}
